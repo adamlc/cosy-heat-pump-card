@@ -4,7 +4,7 @@ A Home Assistant dashboard card that draws an Octopus Cosy 6 outdoor unit,
 with a fan that spins while your heat pump is running. With a fan-speed
 sensor, it spins faster and slower with the real fan.
 
-![Cosy Heat Pump Card](images/card.png)
+![Cosy Heat Pump Card](images/card.jpg)
 
 It works with whatever your setup exposes:
 
