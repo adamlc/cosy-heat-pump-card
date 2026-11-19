@@ -40,8 +40,9 @@ for reduced motion.
 
 ## Configuration
 
-Add the card from the dashboard card picker (the visual editor covers the
-main options), or in YAML:
+Add the card from the dashboard card picker. The visual editor covers
+everything except custom stat names/icons and `states` labels, which go in
+the code editor. Or in YAML:
 
 ```yaml
 type: custom:cosy-heat-pump-card

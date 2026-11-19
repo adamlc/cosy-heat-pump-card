@@ -316,6 +316,7 @@ const SCHEMA = [
   { name: "name", selector: { text: {} } },
   { name: "entity", required: true, selector: { entity: {} } },
   { name: "state_entity", selector: { entity: {} } },
+  { name: "stats", selector: { entity: { multiple: true } } },
   {
     type: "expandable",
     title: "Fan speed",
@@ -330,17 +331,27 @@ const SCHEMA = [
 
 const LABELS = {
   name: "Name",
-  entity: "Fan / running entity (RPM sensor, binary sensor, power sensor or climate)",
-  state_entity: "Status entity (optional)",
-  rpm_per_turn: `RPM per drawn turn per second (default ${DEFAULT_RPM_PER_TURN})`,
-  running_threshold: "Running above (numeric non-RPM sources, default 0)",
-  speed: `Spin speed when only on/off is known (turns/s, default ${DEFAULT_SPEED})`,
+  entity: "Fan entity",
+  state_entity: "Status entity",
+  stats: "Stats",
+  rpm_per_turn: "RPM per turn",
+  running_threshold: "Running above",
+  speed: "On/off spin speed",
   show_logo: "Show octopus on the hub",
+};
+
+const HELPERS = {
+  entity: "An RPM sensor, binary sensor, power sensor or climate entity - whatever says the heat pump is running.",
+  state_entity: "Optional. Sets the status label; for a climate entity its current action is used.",
+  stats: "Shown beside the unit, two per row. Each uses its entity's own name and icon.",
+  rpm_per_turn: `RPM sensors only: real RPM per drawn turn a second (default ${DEFAULT_RPM_PER_TURN}).`,
+  running_threshold: "Numeric sensors that aren't RPM, e.g. power: spins above this (default 0).",
+  speed: `Turns a second when the entity only says running or not (default ${DEFAULT_SPEED}).`,
 };
 
 class CosyHeatPumpCardEditor extends HTMLElement {
   setConfig(config) {
-    this._config = { show_logo: true, ...config };
+    this._config = { ...config };
     if (this._config.fan_entity && !this._config.entity) this._config.entity = this._config.fan_entity;
     this._render();
   }
@@ -350,25 +361,40 @@ class CosyHeatPumpCardEditor extends HTMLElement {
     this._render();
   }
 
+  // The form edits stats as a plain list of entity ids; per-stat name/icon
+  // overrides from YAML are carried over for entities that stay in the list.
+  _formData() {
+    const stats = (this._config.stats || []).map((s) => (typeof s === "string" ? s : s.entity)).filter(Boolean);
+    return { ...this._config, stats, show_logo: this._config.show_logo !== false };
+  }
+
+  _changed(value) {
+    const previous = new Map((this._config.stats || []).map((s) => (typeof s === "string" ? [s, s] : [s.entity, s])));
+    const config = { ...this._config, ...value };
+    config.stats = (value.stats || []).map((id) => previous.get(id) || id);
+    for (const k of Object.keys(config)) {
+      if (config[k] === "" || config[k] === undefined || (Array.isArray(config[k]) && !config[k].length)) delete config[k];
+    }
+    delete config.fan_entity;
+    if (config.show_logo === true) delete config.show_logo;
+    this._config = config;
+    this.dispatchEvent(new CustomEvent("config-changed", { detail: { config }, bubbles: true, composed: true }));
+  }
+
   _render() {
     if (!this._hass || !this._config) return;
     if (!this._form) {
       this._form = document.createElement("ha-form");
       this._form.computeLabel = (s) => LABELS[s.name] || s.name;
-      this._form.addEventListener("value-changed", (ev) => {
-        const config = { ...this._config, ...ev.detail.value };
-        for (const k of Object.keys(config)) if (config[k] === "" || config[k] === undefined) delete config[k];
-        delete config.fan_entity;
-        this._config = config;
-        this.dispatchEvent(new CustomEvent("config-changed", { detail: { config }, bubbles: true, composed: true }));
-      });
+      this._form.computeHelper = (s) => HELPERS[s.name];
+      this._form.addEventListener("value-changed", (ev) => this._changed(ev.detail.value));
       const note = document.createElement("p");
       note.style.cssText = "color: var(--secondary-text-color); font-size: 13px; margin: 16px 0 0";
-      note.textContent = "Stats and custom status labels are set in the code editor - see the README.";
+      note.textContent = "Custom stat names/icons and status labels are set in the code editor - see the README.";
       this.append(this._form, note);
     }
     this._form.hass = this._hass;
-    this._form.data = this._config;
+    this._form.data = this._formData();
     this._form.schema = SCHEMA;
   }
 }
