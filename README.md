@@ -24,11 +24,16 @@ for reduced motion.
 
 ## Installation
 
-### HACS
+### Marketplace (or HACS)
 
-1. In HACS, open the menu (⋮) → **Custom repositories**.
-2. Add `https://github.com/adamlc/cosy-heat-pump-card` with type **Dashboard**.
-3. Search for **Cosy Heat Pump Card**, download it, and reload the browser.
+[![Open your Home Assistant instance and open this repository.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=adamlc&repository=cosy-heat-pump-card&category=plugin)
+
+1. Click the button above. It opens this card in the Marketplace of your own
+   Home Assistant (HACS before 2026.11), and offers to add the repository.
+2. Download it, then reload your browser.
+
+The Marketplace adds the dashboard resource for you, and updates it with
+each new release.
 
 ### Manual
 

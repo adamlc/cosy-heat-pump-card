@@ -1,7 +1,7 @@
 # cosy-heat-pump-card
 
-A Home Assistant dashboard card (distributed through HACS / the HA
-marketplace) that draws an Octopus Cosy 6 outdoor unit with a fan that spins
+A Home Assistant dashboard card (distributed through the HA Marketplace,
+formerly HACS) that draws an Octopus Cosy 6 outdoor unit with a fan that spins
 while the heat pump runs. Unofficial, not affiliated with Octopus Energy.
 
 ## Layout
@@ -47,6 +47,27 @@ There's no test suite. For the card, load the JS in a plain page with stub
 `_target` speed. Animation frames pause in a background tab, so read
 `_target`, not `_rate`. The editor uses HA's `ha-form`, so it only renders
 inside a real Home Assistant - check it there before releasing.
+
+## Marketplace
+
+HA 2026.11+ calls HACS the Marketplace; `hacs.json`, the catalog and the
+HACS action still call this type `plugin` (shown as "Dashboard"). Guide:
+https://contributors.home-assistant.io/marketplace/guides/dashboard/
+
+- The Marketplace looks for the card in the latest release's assets first,
+  then the repo root - so every release must attach the current
+  `cosy-heat-pump-card.js`, or users get a stale file.
+- It installs to `www/community/cosy-heat-pump-card/` and adds the resource
+  itself with a versioned URL, so Marketplace users never bump `?v=`.
+- The README badge uses the `hacs_repository` My link on purpose: it opens
+  HACS before 2026.11 and the Marketplace after (`marketplace_repository`
+  only works on 2026.11+).
+- The catalog check needs images in the README - keep `images/card.gif`.
+- Getting into the catalog (findable without the link) is a PR to
+  `hacs/default`, adding `adamlc/cosy-heat-pump-card` to the `plugin` file
+  in alphabetical order, with the template filled in. The review backlog is
+  months long. Guide:
+  https://contributors.home-assistant.io/marketplace/guides/catalog/
 
 ## Releasing
 
